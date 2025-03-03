@@ -1,3 +1,5 @@
+// TODO: fix dynamic size memory-reallocation
+
 #ifndef MEMORY_POOL_H
 #define MEMORY_POOL_H
 #include <sys/mman.h>

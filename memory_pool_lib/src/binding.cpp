@@ -1,10 +1,21 @@
+// Mostly generated with chatGPT
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>  // For automatic conversions of STL containers
+#include <iostream>
 #include "MemoryPool.h"
-
 namespace py = pybind11;
+class PyParent {
+    public:
+        PyParent() { 
+            std::cout << "Parent class initialized\n"; 
+        }
+        
+        virtual ~PyParent() {
+            std::cout << "Parent class destroyed\n";
+        }
+};
 
-class PyMemoryPool {
+class PyMemoryPool : public PyParent {
 public:
     PyMemoryPool(const std::string& name, bool attach) 
         : pool(new MemoryPool(name, attach)) {}
@@ -53,8 +64,11 @@ private:
     }
 };
 
-PYBIND11_MODULE(memory_pool, m) {
-    py::class_<PyMemoryPool>(m, "MemoryPool")
+PYBIND11_MODULE(memory_pool, m) {  // Match the module name to the shared library name
+    pybind11::class_<PyParent>(m, "Parent")
+        .def(pybind11::init<>());
+
+    pybind11::class_<PyMemoryPool, PyParent>(m, "MemoryPool")
         .def(py::init<const std::string&, bool>(), "Constructor for MemoryPool", py::arg("name"), py::arg("attach"))
         .def("add", &PyMemoryPool::add, "Add a key-value pair to the memory pool")
         .def("list_keys", &PyMemoryPool::list_keys, "Get all keys")

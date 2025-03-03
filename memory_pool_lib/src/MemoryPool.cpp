@@ -14,13 +14,13 @@ MemoryPool::MemoryPool(const std::string& shm_name, bool attach) : shm_name(shm_
     if (attach) {
         flags = O_RDWR;
     }
-    // open or create the memory depending on the flag
+    // open or create the memory depending on the flag, returns file descriptor
     shm_fd = shm_open(shm_name.c_str(), flags, 0666);
 
     try {
         assert(shm_fd != -1 && "Failed to open shared memory.");
         if (!attach) {
-            // set the size of the memory
+            // set the size of the memory from size of header
             int size_is_set = ftruncate(shm_fd, shm_size);
             assert(size_is_set != -1 && "Failed to set shared memory size.");
         }
@@ -33,8 +33,6 @@ MemoryPool::MemoryPool(const std::string& shm_name, bool attach) : shm_name(shm_
         std::cerr << "try block failed" << std::endl;
         return;
     }
-
-
 
     header = static_cast<SharedMemoryHeader*>(shared_memory);
     
@@ -60,12 +58,12 @@ MemoryPool::~MemoryPool() {
 }
 
 void MemoryPool::add_value(const std::string& key, PyObject* value) {
-    // lock the mutex to this process
+    // lock the header to this process
     pthread_mutex_lock(&header->lock);
     char* serialized_data = PyBytes_AsString(value);
     size_t serialized_size = PyBytes_Size(value);
     try {
-        assert(header->count < MAX_ENTRIES && "Shared memory is full!");
+        assert(header->count < MAX_ENTRIES && "Shared memory is full! Create a new memory pool.");
         assert(PyBytes_Check(value) && "Error: Only bytes values are allowed!");
         assert(serialized_data && "Error: Failed to convert Python bytes to bytes!");
         assert(serialized_size <= VALUE_SIZE && "Error: Data is too large for shared memory!");
@@ -97,6 +95,7 @@ void MemoryPool::add_value(const std::string& key, PyObject* value) {
 }
 
 PyObject* MemoryPool::list_keys() {
+    // Create a list for the keys
     PyObject* keys = PyList_New(header->count);
     if (!keys) {
         return nullptr;
@@ -105,9 +104,11 @@ PyObject* MemoryPool::list_keys() {
         size_t key_len = strnlen(header->entries[i].key, KEY_SIZE);
         PyObject* py_str = PyUnicode_FromStringAndSize(header->entries[i].key, key_len);
         if (!py_str) {
+            // Decrease ref count if 0 the memory is freed
             Py_DECREF(keys);
             return nullptr;
         }
+        // Set item to list keys
         PyList_SET_ITEM(keys, i, py_str);
     }
     return keys;

@@ -1,3 +1,9 @@
+# memory_pool
+A KISS (Keep It Simple Stupid) module for python.
+Ment to create a shared memory pool from an id where you can share
+data and class object during runtime of X amount of python processes running.
+Implemented with mutex lock.
+
 ## How to install: 
 
 ### Create the venv:

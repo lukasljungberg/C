@@ -1,4 +1,4 @@
-# 🚀 memory_pool
+# 💾 memory_pool
 
 A **KISS (Keep It Simple Stupid)** module for Python.
 

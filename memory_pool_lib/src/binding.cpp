@@ -10,6 +10,7 @@ public:
         : pool(new MemoryPool(name, attach)) {}
 
     ~PyMemoryPool() {
+        delete_pool();
         delete pool;
     }
 
@@ -45,12 +46,11 @@ public:
         return py::reinterpret_borrow<py::object>(value);
     }
 
+private:
+    MemoryPool* pool;
     void delete_pool() {
         pool->delete_pool();
     }
-
-private:
-    MemoryPool* pool;
 };
 
 PYBIND11_MODULE(memory_pool, m) {
@@ -58,6 +58,5 @@ PYBIND11_MODULE(memory_pool, m) {
         .def(py::init<const std::string&, bool>(), "Constructor for MemoryPool", py::arg("name"), py::arg("attach"))
         .def("add", &PyMemoryPool::add, "Add a key-value pair to the memory pool")
         .def("list_keys", &PyMemoryPool::list_keys, "Get all keys")
-        .def("get", &PyMemoryPool::get, "Get a value by key")
-        .def("delete", &PyMemoryPool::delete_pool, "Delete the entire memory pool");
+        .def("get", &PyMemoryPool::get, "Get a value by key");
 }

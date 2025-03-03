@@ -24,6 +24,7 @@ MemoryPool::MemoryPool(const std::string& shm_name, bool attach) : shm_name(shm_
             int size_is_set = ftruncate(shm_fd, shm_size);
             assert(size_is_set != -1 && "Failed to set shared memory size.");
         }
+        // map the memory to this process
         shared_memory = mmap(NULL, shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
         assert(shared_memory != MAP_FAILED && "Failed to map shared memory.");
 
@@ -34,7 +35,6 @@ MemoryPool::MemoryPool(const std::string& shm_name, bool attach) : shm_name(shm_
     }
 
 
-    // map the memory to the process
 
     header = static_cast<SharedMemoryHeader*>(shared_memory);
     
@@ -60,6 +60,7 @@ MemoryPool::~MemoryPool() {
 }
 
 void MemoryPool::add_value(const std::string& key, PyObject* value) {
+    // lock the mutex to this process
     pthread_mutex_lock(&header->lock);
     char* serialized_data = PyBytes_AsString(value);
     size_t serialized_size = PyBytes_Size(value);
@@ -76,19 +77,22 @@ void MemoryPool::add_value(const std::string& key, PyObject* value) {
     }
 
     for (size_t i = 0; i < header->count; ++i) {
+        // If the strings are equal we've found the existing key
         if (strncmp(header->entries[i].key, key.c_str(), KEY_SIZE) == 0) {
-            memcpy(header->entries[i].value, serialized_data, serialized_size);
+            memcpy(header->entries[i].value, serialized_data, serialized_size); // Copy new data to existing entry
             header->entries[i].value_size = serialized_size;  // Store the size of the value
             pthread_mutex_unlock(&header->lock);
             return;
         }
     }
+    // If it's a new key, copy the key name and value into a new entry
     strncpy(header->entries[header->count].key, key.c_str(), KEY_SIZE);
     header->entries[header->count].key[KEY_SIZE - 1] = '\0'; 
     memcpy(header->entries[header->count].value, serialized_data, serialized_size);
     header->entries[header->count].value_size = serialized_size;
     header->count++;
 
+    // unlock the mutex from this process
     pthread_mutex_unlock(&header->lock);
 }
 
@@ -130,6 +134,7 @@ PyObject* MemoryPool::get_value(const std::string& key) {
 
 
 void MemoryPool::delete_pool() {
-    pthread_mutex_destroy(&header->lock); 
+    pthread_mutex_destroy(&header->lock);
     shm_unlink(shm_name.c_str());
+    std::cerr << shm_name + " is deleted!" << std::endl;
 }

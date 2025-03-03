@@ -1,4 +1,4 @@
-# 🚀 C++ Projects  
+# 🗼 C++ Projects  
 
 Welcome to my collection of cool C/C++ projects! 🏗️💻  
 

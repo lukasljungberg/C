@@ -7,3 +7,5 @@
 4. cd ..
 5. python setup.py build_ext --inplace
 6. pip install .
+
+#### Look in the example.py to see usage

@@ -9,3 +9,5 @@
 6. pip install .
 
 #### Look in the example.py to see usage
+
+#### WIP: dynamic size allocation for the pool...

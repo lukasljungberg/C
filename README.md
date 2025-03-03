@@ -1,7 +1,7 @@
 ## How to install: 
 
 ### Create the venv:
-1. cd C && python -m venv venv
+1. cd C && python -m venv venv && source venv/bin/activate
 2. pip install pybind11
 
 #### Make sure to change the pybind11 include path to your path in setup.py

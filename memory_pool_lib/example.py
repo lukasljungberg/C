@@ -8,7 +8,7 @@ class MPool(mp.MemoryPool):
 pool = MPool("m_mem", False)
 pool_attached = MPool("m_mem", True)
 pool.add("test", b"testBYTES")
-print(pool.get("test"))
+print(pool_attached.get("test"))
 
 del pool_attached
 del pool

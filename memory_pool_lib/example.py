@@ -1,5 +1,6 @@
 import memory_pool as mp
 
+# MemoryPool can be inherited or also used to create an python object = MemoryPool()
 class MPool(mp.MemoryPool):
     def __init__(self, *args, **kwargs):
         super(MPool, self).__init__(*args, **kwargs)

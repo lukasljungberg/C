@@ -10,7 +10,7 @@ module = Extension(
     'memory_pool',  # The name of the Python module
     sources=['src/MemoryPool.cpp', 'src/binding.cpp'],  # Your C++ source file(s)
     # Update this path below to your pybind11 include-->
-    include_dirs=["/home/pat0/C++/venv/lib64/python3.13/site-packages/pybind11/include"],  # Include the pybind11 headers
+    include_dirs=["<DIR>"],  # Include the pybind11 headers
     extra_compile_args=['-std=c++11'],  # Add any required compile flags
     language='c++',  # Ensure the extension is compiled as C++
 )

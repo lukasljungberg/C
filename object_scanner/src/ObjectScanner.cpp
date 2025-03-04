@@ -5,6 +5,10 @@ ObjectScanner::ObjectScanner(pid_t pid)
     proc_id = pid;
 }
 
+ObjectScanner::~ObjectScanner()
+{
+}
+
 bool ObjectScanner::Attach()
 {   
     try {
@@ -14,6 +18,7 @@ bool ObjectScanner::Attach()
         pid_t waited = waitpid(proc_id, NULL, 0);
         assert(waited == 0 && "Failed waiting for process");
 
+        // Sets the memoryRegions
         bool mem_regions = GetMemoryRegions();
         assert(mem_regions && "Failed to get memory regions of the child process");
 
@@ -34,12 +39,11 @@ bool ObjectScanner::GetMemoryRegions()
         bool is_opened = file.is_open();
         assert(is_opened && "Failed to open process memory map file for the PID");
 
-        // Read the lines
         while (std::getline(file, line)) {
             std::istringstream iss(line);
             std::string startAddr, endAddr;
 
-            // Extract the start and end addresses from the line
+            // Get the memory segment, start -> end
             if (iss >> startAddr >> endAddr) {
                 memoryRegions.push_back({startAddr, endAddr});
         }
@@ -54,6 +58,16 @@ bool ObjectScanner::GetMemoryRegions()
     return true;
 }
 
-ObjectScanner::~ObjectScanner()
-{
+const DynamicObject* ObjectScanner::ReconstructObjects() {
+    std::cout << "Reconstructing class structures from memory...\n";
+
+    // Ensure memory is large enough
+    if (memoryRegions.size() >= sizeof(DynamicObject)) {
+        // Get a reference to the struct using reinterpret_cast
+        const DynamicObject* obj = reinterpret_cast<const DynamicObject*>(memoryRegions.data());
+
+        std::cout << "Detected object at fake memory location.\n";
+        return obj;
+    }
+    return nullptr;
 }

@@ -18,6 +18,6 @@ Feel free to grab a 🍿 and relax while the magic happens!
 - Fast, efficient, and ready for big things 💥
 
 ### 🛠️ Installation
-```bash 
-    nothing yet
+```bash
+c++ -O3 -Wall -shared -std=c++17 -fPIC $(python3 -m pybind11 --includes) -o object_scanner.so src/binding.cpp src/ObjectScanner.cpp -lpthread
 ```

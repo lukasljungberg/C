@@ -2,7 +2,7 @@ import sys
 import object_scanner
 
 # Create an ObjectScanner instance
-scanner = object_scanner.ObjectScanner(17915)  # Replace with an actual process ID
+scanner = object_scanner.ObjectScanner(7486)  # Replace with an actual process ID
 
 # Attach to the process
 if scanner.attach():

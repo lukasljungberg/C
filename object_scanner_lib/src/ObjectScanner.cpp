@@ -21,9 +21,11 @@ bool ObjectScanner::Attach()
         // Sets the memoryRegions
         bool mem_regions = GetMemoryRegions();
         assert(mem_regions && "Failed to get memory regions of the child process");
+        ptrace(PTRACE_DETACH, proc_id, NULL, NULL);
 
     } catch (const std::exception &e) {
         std::cerr << "Exception in Attach: " << e.what() << std::endl;
+        ptrace(PTRACE_DETACH, proc_id, NULL, NULL);
         return false;
     }
     return true;
@@ -43,15 +45,27 @@ bool ObjectScanner::GetMemoryRegions()
             std::istringstream iss(line);
             std::string addressRange, permissions, offset, dev, inode, pathname;
             if (iss >> addressRange >> permissions >> offset >> dev >> inode) {
-                // Optional: Read the pathname (if present)
+                // Optional
                 std::getline(iss, pathname);
-                
-                // Extract start and end addresses
-                size_t dashPos = addressRange.find('-');
-                if (dashPos != std::string::npos) {
-                    std::string startAddr = addressRange.substr(0, dashPos);
-                    std::string endAddr = addressRange.substr(dashPos + 1);
-                    memoryRegions.push_back({startAddr, endAddr});
+                if (permissions[0] != 'r') continue;
+                if (iss >> pathname) continue;
+                std::cout << line << std::endl;
+                size_t dash_pos = addressRange.find('-');
+                std::string start_str = addressRange.substr(0, dash_pos);
+                std::string end_str = addressRange.substr(dash_pos + 1);
+
+                void* start_addr = reinterpret_cast<void*>(std::stoull(start_str, nullptr, 16));
+                void* end_addr = reinterpret_cast<void*>(std::stoull(end_str, nullptr, 16));
+
+                for (char* addr = static_cast<char*>(start_addr); addr < static_cast<char*>(end_addr); addr += 1) {
+                    long data = ptrace(PTRACE_PEEKDATA, proc_id, static_cast<void*>(addr), NULL);
+                    //std::cout << static_cast<void*>(addr) << std::endl;
+                    if (data == 1234567)
+                        std::cout << data << std::endl;
+                    int value = static_cast<int>(data);
+                    if (value == 1234567)
+                        std::cout << value << std::endl;
+                    addressArray.push_back(addr);
                 }
             }
         }
@@ -65,8 +79,7 @@ bool ObjectScanner::GetMemoryRegions()
     return true;
 }
 
-const DynamicObject* ObjectScanner::ReconstructObjects() {
-    static DynamicObject fakeObject;
-    return &fakeObject;  // Return a dummy object for now
+void ObjectScanner::ReconstructObjects() {
+
 }
 

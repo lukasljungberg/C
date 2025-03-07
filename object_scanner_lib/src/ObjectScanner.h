@@ -12,6 +12,13 @@
 #include <unistd.h>
 #include <cstdint>
 #include <Python.h>
+#include <sys/ptrace.h>
+#include <cstring>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 class DynamicObject {
     public:
@@ -48,14 +55,14 @@ class ObjectScanner
     private:
         // PID
         pid_t proc_id;
-
+        std::vector<long> bytesArr;
         // Memory regions
-        std::vector<std::pair<std::string, std::string>> memoryRegions;
+        std::vector<void*> addressArray;
         bool GetMemoryRegions();
     public:
         ObjectScanner(pid_t pid);
         bool Attach();
-        const DynamicObject* ReconstructObjects();
+        void ReconstructObjects();
         ~ObjectScanner();
 };
 

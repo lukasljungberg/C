@@ -1,4 +1,4 @@
-# 🧵 C++ String Scanner 🔍 Library for Python 🐍  
+# 🧵 C++ String Scanner 🔍 Module for Python 🐍  
 
 A **python module** for scanning strings in processes on **Linux** 🐧.  
 Supports **regex** 🔢 and **object address offset** for different process types.  

@@ -9,7 +9,7 @@ Welcome to my collection of cool C/C++ projects! 🏗️💻
 🛠️ *Currently working on dynamic size allocation!*  
 
 ### 🔍 String Scanner  
-📌 **[String Scanner](/string_scanner_lib/README.md)** – ASM-powered string scanning for Linux processes.  
+📌 **[String Scanner](/string_scanner_lib/README.md)** – String scanning for Linux processes.  
 ⚡ Supports **regex** and **object address offsets**!  
 
 ### 🏗️ Work in Progress...  
